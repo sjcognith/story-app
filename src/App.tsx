@@ -23,10 +23,12 @@ class App extends Component<{}, AppState> {
       filteredHits: [],
     };
     this.listRef = React.createRef<HTMLUListElement>();
+
+    // Fetch data initially
+    this.fetchData();
   }
 
   componentDidMount() {
-    this.fetchData(); // Fetch data initially
     this.timerId = setInterval(this.fetchData, 10000); // Fetch data every 10 seconds
     window.addEventListener("scroll", this.handleScroll); // Add scroll event listener
   }
@@ -130,7 +132,7 @@ class App extends Component<{}, AppState> {
             return (
               <Card
                 onClick={() => console.log(hit)}
-                key={key}
+                key={objectID}
                 _tags={_tags}
                 author={author}
                 authorUrl={authorUrl}
