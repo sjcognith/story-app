@@ -132,7 +132,7 @@ class App extends Component<{}, AppState> {
             return (
               <Card
                 onClick={() => console.log(hit)}
-                key={objectID}
+                key={key}
                 _tags={_tags}
                 author={author}
                 authorUrl={authorUrl}
