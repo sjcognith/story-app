@@ -1,125 +1,124 @@
 import React, { Component } from "react";
 import Card from "./components/Card";
 import Input from "./components/Input";
-class App extends Component {
-  hits = [
-    {
-      created_at: "2023-05-26T05:13:09.000Z",
-      title: "Lenster a decentralized and permissionless social media app",
-      url: "https://github.com/lensterxyz/lenster",
-      author: "latchkey",
-      points: 2,
-      story_text: null,
-      comment_text: null,
-      num_comments: 0,
-      story_id: null,
-      story_title: null,
-      story_url: null,
-      parent_id: null,
-      created_at_i: 1685077989,
-      _tags: ["story", "author_latchkey", "story_36080228"],
-      objectID: "36080228",
-      _highlightResult: {
-        title: {
-          value: "Lenster a decentralized and permissionless social media app",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-        url: {
-          value: "https://github.com/lensterxyz/lenster",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-        author: {
-          value: "latchkey",
-          matchLevel: "none",
-          matchedWords: [],
-        },
+import { baseUrl } from "./utils/api";
+
+interface AppState {
+  hits: any[];
+  page: number;
+  searchQuery: string;
+  filteredHits: any[];
+}
+
+class App extends Component<{}, AppState> {
+  private listRef: React.RefObject<HTMLUListElement>;
+  private timerId: NodeJS.Timeout | null = null;
+
+  constructor(props: {}) {
+    super(props);
+    this.state = {
+      hits: [],
+      page: 0,
+      searchQuery: "",
+      filteredHits: [],
+    };
+    this.listRef = React.createRef<HTMLUListElement>();
+  }
+
+  componentDidMount() {
+    this.fetchData(); // Fetch data initially
+    this.timerId = setInterval(this.fetchData, 10000); // Fetch data every 10 seconds
+    window.addEventListener("scroll", this.handleScroll); // Add scroll event listener
+  }
+
+  componentWillUnmount() {
+    if (this.timerId) {
+      clearInterval(this.timerId); // Clear the interval when the component is unmounted
+    }
+    window.removeEventListener("scroll", this.handleScroll); // Remove scroll event listener
+  }
+
+  handleScroll = () => {
+    if (
+      this.listRef.current &&
+      window.innerHeight + window.scrollY >=
+        this.listRef.current.offsetTop + this.listRef.current.offsetHeight - 200
+    ) {
+      this.fetchNextPage(); // Fetch next page when scrolled near the bottom
+    }
+  };
+
+  fetchData = () => {
+    const { page, searchQuery } = this.state;
+    const nextPage = page + 1;
+
+    fetch(baseUrl + `/search_by_date?tags=story&page=${nextPage}`)
+      .then((response) => response.json())
+      .then((data) => {
+        this.setState(
+          (prevState) => ({
+            hits: [...prevState.hits, ...data.hits], // Append new data to existing hits array
+            page: nextPage, // Increment the page number
+          }),
+          () => {
+            this.filterHits(); // Filter hits after fetching data
+          },
+        );
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
+
+  filterHits = () => {
+    const { searchQuery, hits } = this.state;
+
+    const filteredHits = hits.filter(
+      (hit) =>
+        hit.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        hit.author.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    this.setState({ filteredHits });
+  };
+
+  fetchNextPage = () => {
+    this.setState(
+      (prevState) => ({
+        page: prevState.page + 1, // Increment the page number
+      }),
+      () => {
+        this.fetchData(); // Fetch next page and update state
       },
-    },
-    {
-      created_at: "2023-05-26T05:10:43.000Z",
-      title: "The Sonnet Machine",
-      url: "https://aeon.co/essays/sonnets-are-machines-for-thinking-through-complex-emotions",
-      author: "Caiero",
-      points: 1,
-      story_text: null,
-      comment_text: null,
-      num_comments: 0,
-      story_id: null,
-      story_title: null,
-      story_url: null,
-      parent_id: null,
-      created_at_i: 1685077843,
-      _tags: ["story", "author_Caiero", "story_36080209"],
-      objectID: "36080209",
-      _highlightResult: {
-        title: {
-          value: "The Sonnet Machine",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-        url: {
-          value:
-            "https://aeon.co/essays/sonnets-are-machines-for-thinking-through-complex-emotions",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-        author: {
-          value: "Caiero",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-      },
-    },
-    {
-      created_at: "2023-05-26T05:08:10.000Z",
-      title:
-        "Mission: Impossible-Dead Reckoning-Part 1 runtime is 2 hrs, 36 min sans credits",
-      url: "https://www.ign.com/articles/exclusive-mission-impossible-dead-reckoning-part-one-runtime-revealed",
-      author: "thunderbong",
-      points: 1,
-      story_text: null,
-      comment_text: null,
-      num_comments: 0,
-      story_id: null,
-      story_title: null,
-      story_url: null,
-      parent_id: null,
-      created_at_i: 1685077690,
-      _tags: ["story", "author_thunderbong", "story_36080198"],
-      objectID: "36080198",
-      _highlightResult: {
-        title: {
-          value:
-            "Mission: Impossible-Dead Reckoning-Part 1 runtime is 2 hrs, 36 min sans credits",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-        url: {
-          value:
-            "https://www.ign.com/articles/exclusive-mission-impossible-dead-reckoning-part-one-runtime-revealed",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-        author: {
-          value: "thunderbong",
-          matchLevel: "none",
-          matchedWords: [],
-        },
-      },
-    },
-  ];
+    );
+  };
+
+  handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    this.setState({ searchQuery: value }, () => {
+      this.filterHits(); // Filter hits based on the new search query
+    });
+  };
 
   render() {
+    const { searchQuery, filteredHits } = this.state;
+
+    console.log("Search query:", searchQuery);
+    console.log("Filtered hits:", filteredHits);
+
     return (
-      <div className="h-screen text-xl max-w-2xl mx-auto mt-12">
+      <div className='h-screen text-xl max-w-2xl mx-auto mt-12'>
         <Input
-          onChange={(e) => console.log(e.target.value)}
-          placeholder="Search"
+          onChange={this.handleChange}
+          value={searchQuery}
+          placeholder='Search'
         />
-        <ul className="divide-y divide-gray-100 mt-8">
-          {this.hits.map((hit) => {
+        <ul
+          ref={this.listRef}
+          className='divide-y divide-gray-100 mt-8'
+          onScroll={this.handleScroll}
+        >
+          {filteredHits.map((hit, key) => {
             const {
               _tags,
               author,
@@ -131,7 +130,7 @@ class App extends Component {
             return (
               <Card
                 onClick={() => console.log(hit)}
-                key={objectID}
+                key={key}
                 _tags={_tags}
                 author={author}
                 authorUrl={authorUrl}
@@ -147,3 +146,4 @@ class App extends Component {
 }
 
 export default App;
+
