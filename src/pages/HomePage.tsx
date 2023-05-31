@@ -66,7 +66,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
           }),
           () => {
             this.filterHits(); // Filter hits after fetching data
-          }
+          },
         );
       })
       .catch((error) => {
@@ -80,7 +80,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     const filteredHits = hits.filter(
       (hit) =>
         hit.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        hit.author.toLowerCase().includes(searchQuery.toLowerCase())
+        hit.author.toLowerCase().includes(searchQuery.toLowerCase()),
     );
 
     this.setState({ filteredHits });
@@ -93,7 +93,7 @@ class HomePage extends Component<HomePageProps, HomePageState> {
       }),
       () => {
         this.fetchData(); // Fetch next page and update state
-      }
+      },
     );
   };
 
@@ -111,15 +111,15 @@ class HomePage extends Component<HomePageProps, HomePageState> {
     console.log("Filtered hits:", filteredHits);
 
     return (
-      <div className="h-screen text-xl max-w-2xl mx-auto mt-12">
+      <div className='h-screen text-xl max-w-2xl mx-auto mt-12'>
         <Input
           onChange={this.handleChange}
           value={searchQuery}
-          placeholder="Search"
+          placeholder='Search'
         />
         <ul
           ref={this.listRef}
-          className="divide-y divide-gray-100 mt-8"
+          className='divide-y divide-gray-100 mt-8'
           onScroll={this.handleScroll}
         >
           {filteredHits.map((hit, key) => {
@@ -133,8 +133,8 @@ class HomePage extends Component<HomePageProps, HomePageState> {
             } = hit;
             return (
               <Card
+                data-testid='card'
                 onClick={() => {
-                  console.log(hit);
                   this.props.goToDetails(hit);
                 }}
                 key={key}
@@ -153,3 +153,4 @@ class HomePage extends Component<HomePageProps, HomePageState> {
 }
 
 export default HomePage;
+
